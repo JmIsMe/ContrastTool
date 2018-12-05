@@ -1,4 +1,4 @@
-package contrast;
+package com.fanjia.mice.util.contrast;
 
 /**
  * @Description:

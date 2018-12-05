@@ -1,6 +1,11 @@
-package contrast;
+package com.fanjia.mice.util.contrast;
+
+import com.fanjia.mice.util.contrast.annotation.ContrastAnnotation;
+
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;
+
 
 /**
  * @Description:
@@ -17,6 +22,8 @@ public class ContrastMsg {
     private String frontMsg;
     private String middleMsg;
     private String backMsg;
+    private String addMsg;
+    private String delMsg;
     //代替null名称
     private String nullMsg;
     //之前的值
@@ -31,6 +38,7 @@ public class ContrastMsg {
     public ContrastMsg() {
 
     }
+
     public String getNullMsg() {
         return nullMsg;
     }
@@ -96,29 +104,85 @@ public class ContrastMsg {
         middleMsg = ca.middleMsg();
         backMsg = ca.backMsg();
         nullMsg = ca.nullMsg();
+        addMsg = ca.addMsg();
+        delMsg = ca.delMsg();
     }
 
+
+    @Override
     public String toString() {
+
         StringBuilder sb = new StringBuilder();
-        sb.append(userName);
-        sb.append(" ");
-        sb.append(frontMsg);
-        sb.append(" ");
-        isNull(sb,beforeValue);
-        sb.append(" ");
-        sb.append(middleMsg);
-        sb.append(" ");
-        isNull(sb,afterValue);
-        sb.append(" ");
-        sb.append(backMsg);
+
+        switch (getState()){
+            case 1:  sb.append(addMsg).append(userName).append(" ").append(afterValue).append(" ").append(backMsg);
+                break;
+            case 2: sb.append(delMsg).append(userName).append(" ").append(beforeValue).append(" ").append(backMsg);
+                break;
+            case 3:
+                sb.append(userName)
+                        .append(" ")
+                        .append(frontMsg)
+                        .append(" ")
+                        .append(beforeValue)
+                        .append(" ")
+                        .append(middleMsg)
+                        .append(" ")
+                        .append(afterValue)
+                        .append(" ")
+                        .append(backMsg);
+                break;
+            default:
+                break;
+
+        }
+
         return sb.toString();
     }
 
-    private void isNull(StringBuilder sb, Object obj){
-        if (obj != null){
+    private void isNull(StringBuilder sb, Object obj) {
+        if (obj != null) {
             sb.append(obj);
-        }else{
+        } else {
             sb.append(nullMsg);
         }
+    }
+
+    private boolean objStrIsEmptys(Object val){
+        if (val == null || val.toString().equals("")){
+            return true;
+        }
+        return false;
+    }
+    private boolean objStrNotEmptys(Object val){
+        if (val != null && !val.toString().equals("")){
+            return true;
+        }
+        return false;
+    }
+
+    private int getState(){
+        int flag = 0;
+        if (objStrIsEmptys(beforeValue) && objStrNotEmptys(afterValue)) {
+            if (objStrNotEmptys(nullMsg)){
+                beforeValue = nullMsg;
+                flag = 3;
+            }else {
+                flag = 1;
+            }
+
+        } else if (objStrIsEmptys(afterValue) && objStrNotEmptys(beforeValue))  {
+            if (objStrNotEmptys(nullMsg)){
+                afterValue = nullMsg;
+                flag = 3;
+            }else {
+                flag = 2;
+            }
+        } else if (objStrNotEmptys(beforeValue) && objStrNotEmptys(afterValue)){
+            flag = 3;
+        }else{
+            flag = 4;
+        }
+        return flag;
     }
 }
